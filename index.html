@@ -224,18 +224,26 @@
 
 <main>
   <p class="eyebrow">Birthday watch</p>
-  <h1>Is it their birthday today?</h1>
-  <p class="sub">Type a name you've added below, and this'll tell you straight away — confetti included, if it's a match.</p>
+  <h1 id="main-headline">Whose birthday is it?</h1>
+  <p class="sub" id="main-sub">Defaults to today — change the date and click Check to look up any day.</p>
 
   <div class="check-row">
-    <input type="text" id="check-input" list="friend-names" placeholder="Type a name…" autocomplete="off">
-    <datalist id="friend-names"></datalist>
-    <button class="btn-primary" id="check-btn">Check</button>
+    <input type="date" id="check-date">
+    <button class="btn-primary" id="check-date-btn">Check</button>
   </div>
 
-  <div class="reveal" id="reveal-area">
-    <p style="color: var(--cream-dim);">Add a friend below, then check their name here.</p>
+  <div id="reveal-area" class="reveal">
+    <p style="color: var(--cream-dim);">Pick a date above and click Check.</p>
   </div>
+
+  <details style="margin: -20px 0 44px;">
+    <summary style="cursor:pointer; color: var(--cream-dim); font-size: 0.9rem;">Look up a specific person instead</summary>
+    <div class="check-row" style="margin-top: 14px;">
+      <input type="text" id="check-input" list="friend-names" placeholder="Type a name…" autocomplete="off">
+      <datalist id="friend-names"></datalist>
+      <button class="btn-primary" id="check-btn">Check</button>
+    </div>
+  </details>
 
   <section class="list-section">
     <p class="list-heading">People you're tracking</p>
@@ -285,6 +293,16 @@
   const nameDatalist = document.getElementById('friend-names');
   const revealArea = document.getElementById('reveal-area');
   const checkInput = document.getElementById('check-input');
+  const dateCheckInput = document.getElementById('check-date');
+
+  // Default the date field to today, formatted as YYYY-MM-DD for <input type="date">
+  {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    dateCheckInput.value = `${yyyy}-${mm}-${dd}`;
+  }
 
   const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
@@ -394,6 +412,33 @@
     }
   }
 
+  function checkDate() {
+    const dateVal = dateCheckInput.value;
+    if (!dateVal) {
+      revealArea.className = 'reveal';
+      revealArea.innerHTML = '<p style="color: var(--cream-dim);">Pick a date above and click Check.</p>';
+      return;
+    }
+
+    const [, month, day] = dateVal.split('-').map(Number);
+    const matches = friends.filter(f => f.month === month && f.day === day);
+
+    if (matches.length > 0) {
+      const names = matches.map(f => escapeHtml(f.name));
+      const namesText = names.length === 1
+        ? names[0]
+        : names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
+      const isPlural = names.length > 1;
+
+      revealArea.className = 'reveal match';
+      revealArea.innerHTML = `<div><p class="headline">🎉 It's ${namesText}'s birthday${isPlural ? 's' : ''}!</p><p>Time to send ${isPlural ? 'those messages' : 'that message'}.</p></div>`;
+      launchConfetti();
+    } else {
+      revealArea.className = 'reveal';
+      revealArea.innerHTML = `<p style="color: var(--cream-dim);">No birthdays on ${formatMonthDay(month, day)}.</p>`;
+    }
+  }
+
   function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
@@ -404,6 +449,8 @@
   checkInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); checkName(); }
   });
+
+  document.getElementById('check-date-btn').addEventListener('click', checkDate);
 
   // --- Confetti ---
   const canvas = document.getElementById('confetti-canvas');
