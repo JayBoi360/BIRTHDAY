@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birthday Watch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #241B2F;
+    --bg-soft: #2E2239;
+    --card: #33253F;
+    --gold: #F2B807;
+    --coral: #FF6F59;
+    --teal: #2FBF9F;
+    --cream: #F7F3EA;
+    --cream-dim: #C9C1D6;
+    --line: rgba(247,243,234,0.14);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: radial-gradient(120% 140% at 50% -10%, var(--bg-soft) 0%, var(--bg) 55%);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 64px 20px 80px;
+  }
+
+  main {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .eyebrow {
+    font-size: 0.8rem;
+    color: var(--cream-dim);
+    letter-spacing: 0.02em;
+    margin: 0 0 10px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(2rem, 5vw, 2.7rem);
+    line-height: 1.15;
+    margin: 0 0 8px;
+    text-align: center;
+  }
+
+  .sub {
+    text-align: center;
+    color: var(--cream-dim);
+    font-size: 0.98rem;
+    margin: 0 0 40px;
+    line-height: 1.5;
+  }
+
+  .check-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  input[type="text"], input[type="date"] {
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--cream);
+    border-radius: 10px;
+    padding: 13px 14px;
+    font-size: 1rem;
+    font-family: inherit;
+    flex: 1;
+    min-width: 0;
+  }
+
+  input[type="text"]:focus, input[type="date"]:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 0.98rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 20px;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+  }
+
+  button:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: var(--gold);
+    color: #241B2F;
+  }
+  .btn-primary:hover { filter: brightness(1.08); }
+
+  .reveal {
+    min-height: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    margin-bottom: 44px;
+  }
+
+  .reveal p {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.5;
+  }
+
+  .reveal .headline {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+  }
+
+  .reveal.match .headline { color: var(--coral); }
+  .reveal.wait .headline { color: var(--teal); }
+
+  section.list-section {
+    border-top: 1px solid var(--line);
+    padding-top: 28px;
+  }
+
+  .list-heading {
+    font-size: 0.95rem;
+    color: var(--cream-dim);
+    margin: 0 0 14px;
+  }
+
+  ul#friend-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 26px;
+  }
+
+  ul#friend-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 2px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  ul#friend-list li .name {
+    font-size: 1rem;
+  }
+
+  ul#friend-list li .date {
+    color: var(--cream-dim);
+    font-size: 0.9rem;
+    margin-left: auto;
+    margin-right: 16px;
+  }
+
+  ul#friend-list li button.remove {
+    background: transparent;
+    color: var(--cream-dim);
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    border: 1px solid var(--line);
+  }
+  ul#friend-list li button.remove:hover {
+    color: var(--coral);
+    border-color: var(--coral);
+  }
+
+  .empty-note {
+    color: var(--cream-dim);
+    font-size: 0.92rem;
+    padding: 10px 0 22px;
+  }
+
+  form#add-form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  form#add-form input[type="text"] {
+    flex: 1 1 160px;
+  }
+
+  form#add-form input[type="date"] {
+    flex: 1 1 150px;
+  }
+
+  form#add-form button {
+    background: var(--teal);
+    color: #16261F;
+    flex: 0 0 auto;
+  }
+
+  canvas#confetti-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    canvas#confetti-canvas { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<main>
+  <p class="eyebrow">Birthday watch</p>
+  <h1>Is it their birthday today?</h1>
+  <p class="sub">Type a name you've added below, and this'll tell you straight away — confetti included, if it's a match.</p>
+
+  <div class="check-row">
+    <input type="text" id="check-input" list="friend-names" placeholder="Type a name…" autocomplete="off">
+    <datalist id="friend-names"></datalist>
+    <button class="btn-primary" id="check-btn">Check</button>
+  </div>
+
+  <div class="reveal" id="reveal-area">
+    <p style="color: var(--cream-dim);">Add a friend below, then check their name here.</p>
+  </div>
+
+  <section class="list-section">
+    <p class="list-heading">People you're tracking</p>
+    <ul id="friend-list"></ul>
+    <p class="empty-note" id="empty-note" style="display:none;">No one added yet — add your first friend below.</p>
+
+    <form id="add-form">
+      <input type="text" id="new-name" placeholder="Friend's name" required>
+      <input type="date" id="new-date" required>
+      <button type="submit">Add friend</button>
+    </form>
+  </section>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // ---- PASTE YOUR FIREBASE CONFIG HERE (see README) ----
+  const firebaseConfig = {
+    apiKey: "AIzaSyDAAiulHyBXSVeNhgpb86tWew_99SJR7K0",
+    authDomain: "birthday-b4532.firebaseapp.com",
+    projectId: "birthday-b4532",
+    storageBucket: "birthday-b4532.firebasestorage.app",
+    messagingSenderId: "109384773974",
+    appId: "1:109384773974:web:bf95273c58b9a471eca6f7"
+  };
+  // --------------------------------------------------------
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const friendsCol = collection(db, "friends");
+
+  let friends = []; // each item: { id, name, month, day } — id is the Firestore doc id
+
+  // Live sync: fires immediately with current data, then again whenever
+  // anyone (on any device) adds or removes a friend.
+  onSnapshot(friendsCol, (snapshot) => {
+    friends = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+  });
+
+  const listEl = document.getElementById('friend-list');
+  const emptyNote = document.getElementById('empty-note');
+  const nameDatalist = document.getElementById('friend-names');
+  const revealArea = document.getElementById('reveal-area');
+  const checkInput = document.getElementById('check-input');
+
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  function formatMonthDay(month, day) {
+    return `${MONTH_NAMES[month - 1]} ${day}`;
+  }
+
+  function render() {
+    listEl.innerHTML = '';
+    nameDatalist.innerHTML = '';
+
+    if (friends.length === 0) {
+      emptyNote.style.display = 'block';
+    } else {
+      emptyNote.style.display = 'none';
+    }
+
+    friends.forEach((friend, idx) => {
+      const li = document.createElement('li');
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'name';
+      nameSpan.textContent = friend.name;
+
+      const dateSpan = document.createElement('span');
+      dateSpan.className = 'date';
+      dateSpan.textContent = formatMonthDay(friend.month, friend.day);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove';
+      removeBtn.textContent = 'Remove';
+      removeBtn.addEventListener('click', () => {
+        deleteDoc(doc(db, 'friends', friend.id));
+        // No need to call render() here — onSnapshot fires automatically
+        // once the deletion lands, and updates everyone's view.
+      });
+
+      li.appendChild(nameSpan);
+      li.appendChild(dateSpan);
+      li.appendChild(removeBtn);
+      listEl.appendChild(li);
+
+      const opt = document.createElement('option');
+      opt.value = friend.name;
+      nameDatalist.appendChild(opt);
+    });
+  }
+
+  document.getElementById('add-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const nameField = document.getElementById('new-name');
+    const dateField = document.getElementById('new-date');
+
+    const name = nameField.value.trim();
+    const dateVal = dateField.value;
+    if (!name || !dateVal) return;
+
+    const [, month, day] = dateVal.split('-').map(Number);
+
+    addDoc(friendsCol, { name, month, day });
+    // No need to call render() here — onSnapshot fires automatically
+    // once the new friend lands, and updates everyone's view.
+
+    nameField.value = '';
+    dateField.value = '';
+    nameField.focus();
+  });
+
+  function daysUntilNextBirthday(month, day, today) {
+    let next = new Date(today.getFullYear(), month - 1, day);
+    if (next < today && !(next.getMonth() === today.getMonth() && next.getDate() === today.getDate())) {
+      next = new Date(today.getFullYear() + 1, month - 1, day);
+    }
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const diff = Math.ceil((next.setHours(0,0,0,0) - today.setHours(0,0,0,0)) / msPerDay);
+    return diff;
+  }
+
+  function checkName() {
+    const query = checkInput.value.trim().toLowerCase();
+    if (!query) {
+      revealArea.className = 'reveal';
+      revealArea.innerHTML = '<p style="color: var(--cream-dim);">Type a name to check.</p>';
+      return;
+    }
+
+    const friend = friends.find(f => f.name.trim().toLowerCase() === query);
+
+    if (!friend) {
+      revealArea.className = 'reveal';
+      revealArea.innerHTML = `<p style="color: var(--cream-dim);">No one named "${escapeHtml(checkInput.value.trim())}" yet — add them below.</p>`;
+      return;
+    }
+
+    const today = new Date();
+    const isBirthday = (today.getMonth() + 1 === friend.month) && (today.getDate() === friend.day);
+
+    if (isBirthday) {
+      revealArea.className = 'reveal match';
+      revealArea.innerHTML = `<div><p class="headline">🎉 It's ${escapeHtml(friend.name)}'s birthday!</p><p>Time to send that message.</p></div>`;
+      launchConfetti();
+    } else {
+      const days = daysUntilNextBirthday(friend.month, friend.day, new Date());
+      const dayWord = days === 1 ? 'day' : 'days';
+      revealArea.className = 'reveal wait';
+      revealArea.innerHTML = `<div><p class="headline">Not today</p><p>${escapeHtml(friend.name)}'s birthday is in ${days} ${dayWord}, on ${formatMonthDay(friend.month, friend.day)}.</p></div>`;
+    }
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  document.getElementById('check-btn').addEventListener('click', checkName);
+  checkInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); checkName(); }
+  });
+
+  // --- Confetti ---
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let animId = null;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  const CONFETTI_COLORS = ['#F2B807', '#FF6F59', '#2FBF9F', '#F7F3EA'];
+
+  function launchConfetti() {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    const count = 160;
+    particles = [];
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: -20 - Math.random() * canvas.height * 0.3,
+        w: 6 + Math.random() * 6,
+        h: 8 + Math.random() * 8,
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        rot: Math.random() * 360,
+        rotSpeed: (Math.random() - 0.5) * 10,
+        speedY: 2 + Math.random() * 3,
+        speedX: (Math.random() - 0.5) * 2,
+        drift: Math.random() * Math.PI * 2,
+      });
+    }
+
+    if (animId) cancelAnimationFrame(animId);
+    const start = performance.now();
+    const duration = 4200;
+
+    function frame(now) {
+      const elapsed = now - start;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach(p => {
+        p.y += p.speedY;
+        p.x += p.speedX + Math.sin((elapsed / 400) + p.drift) * 0.6;
+        p.rot += p.rotSpeed;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rot * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      });
+
+      if (elapsed < duration) {
+        animId = requestAnimationFrame(frame);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles = [];
+      }
+    }
+    animId = requestAnimationFrame(frame);
+  }
+
+  render();
+</script>
+
+</body>
+</html>
